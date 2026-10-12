@@ -1,15 +1,15 @@
 /* =========================================================
-   1. ТЕМЫ И БАЗОВЫЕ ПЕРЕМЕННЫЕ
+   1. ТЕМЫ И БАЗОВЫЕ НАСТРОЙКИ
 ========================================================= */
 :root, [data-theme="emerald"] {
-  --bg: #f4f6f3;
+  --bg: #f4f6f4;
   --panel: #ffffff;
   --ink: #17241e;
-  --muted: #5f7067;
-  --line: #d3ded7;
-  --line-strong: #aabeb2;
+  --muted: #5e7066;
+  --line: #d1ded7;
+  --line-strong: #a9beae;
   --accent: #15664c;
-  --accent-light: #e5f3ec;
+  --accent-light: #e4f2eb;
   --accent-ink: #ffffff;
   --warn: #c92a2a;
   --hl: #fff2a8;
@@ -73,7 +73,7 @@
   --radius: 10px;
   --radius-sm: 6px;
   --shadow: 0 4px 12px rgba(0,0,0,.05);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,.15);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.18);
 }
 
 * { box-sizing: border-box; }
@@ -81,29 +81,27 @@
 html, body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden; /* Защита от горизонтального дерганья */
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 16px/1.45 system-ui, -apple-system, Roboto, sans-serif;
+  font: 16px/1.4 system-ui, -apple-system, Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  padding-bottom: 70px; /* Запас под плавающий нижний бар */
 }
 
-button, input, select {
-  font: inherit;
-  color: inherit;
-}
+button, input, select { font: inherit; color: inherit; }
 
 input, select {
   min-width: 0;
   background: var(--panel);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  font-size: 16px; /* Не вызывает зум в iOS */
+  padding: 9px 11px;
+  font-size: 16px;
 }
 
 input:focus, select:focus, button:focus-visible {
@@ -115,7 +113,7 @@ button {
   background: var(--panel);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  padding: 9px 13px;
   cursor: pointer;
   user-select: none;
   font-weight: 500;
@@ -133,34 +131,25 @@ button.danger { color: var(--warn); }
 [hidden] { display: none !important; }
 
 /* =========================================================
-   2. ШАПКА И ПЕРЕКЛЮЧАТЕЛЬ ТЕМ
+   2. ШАПКА И СЕЛЕКТОР ТАРИФОВ
 ========================================================= */
 .wrap {
   width: 100%;
-  max-width: 1600px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 12px 14px 60px;
+  padding: 12px 14px 40px;
 }
 
 .header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 8px;
 }
 
-h1 {
-  font-size: 1.5rem;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.sub {
-  color: var(--muted);
-  margin: 2px 0 0;
-  font-size: 0.88rem;
-}
+h1 { font-size: 1.45rem; margin: 0; }
+.sub { color: var(--muted); margin: 2px 0 0; font-size: 0.85rem; }
 
 .theme-picker {
   display: flex;
@@ -169,7 +158,6 @@ h1 {
   border: 1px solid var(--line);
   padding: 3px 5px;
   border-radius: 30px;
-  flex-shrink: 0;
 }
 
 .theme-btn {
@@ -192,21 +180,59 @@ h1 {
 }
 
 .top-controls {
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
 }
 
 .bar-search {
   display: flex;
   gap: 8px;
+}
+.bar-search #q { flex: 1; }
+.bar-search #cat { flex: 0 0 auto; max-width: 180px; }
+
+/* Переключатель тарифа цен Розница/Опт/Закупка */
+.tier-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.tier-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tier-pills {
+  display: flex;
+  gap: 6px;
   width: 100%;
 }
 
-.bar-search #q { flex: 1; }
-.bar-search #cat { flex: 0 0 auto; max-width: 180px; }
+.btn-tier {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid var(--line);
+}
+
+.btn-tier.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
 
 details {
   background: var(--panel);
@@ -218,7 +244,6 @@ summary {
   padding: 10px 14px;
   cursor: pointer;
   font-weight: 600;
-  user-select: none;
 }
 
 .form {
@@ -239,16 +264,11 @@ summary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   margin-right: auto;
 }
 
-.bar-actions .chk input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--accent);
-}
+.bar-actions .chk input { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; }
 
 .btn-edit-mode.active {
   background: var(--soft);
@@ -257,11 +277,11 @@ summary {
 }
 
 /* =========================================================
-   3. СЕТКА И НАВИГАЦИЯ
+   3. СЕТКА И СПИСОК ТОВАРОВ
 ========================================================= */
 .layout {
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
+  grid-template-columns: 200px minmax(0, 1fr);
   gap: 16px;
   align-items: start;
   margin-top: 14px;
@@ -296,8 +316,8 @@ summary {
   padding: 8px 10px;
   border: 0;
   background: transparent;
-  border-radius: 8px;
-  font-size: 0.92rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
 
 .nav button.active {
@@ -308,193 +328,309 @@ summary {
 
 .nav .cnt { color: var(--muted); font-size: 0.8rem; }
 
-/* =========================================================
-   4. ЧЕК ЗАКАЗА (ПОЛНОСТЬЮ АДАПТИВНЫЙ)
-========================================================= */
-.receipt-slot {
-  margin-bottom: 16px;
-  min-width: 0;
+/* Секция фирмы */
+section.firm { margin-bottom: 20px; }
+
+section.firm h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding-left: 8px;
+  border-left: 4px solid var(--accent);
+  font-size: 1.15rem;
 }
 
-#receipt {
-  background: var(--panel);
-  border: 2px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 14px;
+section.firm h2 .gc { color: var(--muted); font-size: 0.82rem; font-weight: normal; }
+
+/* Компактный список товаров */
+.item-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: var(--shadow);
+  gap: 6px;
 }
 
-.rhead {
+.p-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: background 0.15s ease;
+}
+
+.p-row:hover { background: var(--card-bg); }
+.p-row.bad { background: var(--warnbg); }
+
+.p-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.p-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.p-title b { word-break: break-word; }
+
+.p-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.p-pricing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.p-cost-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.p-main-price {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.p-sub-prices {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.btn-add-compact {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.pid {
+  display: inline-block;
+  padding: 1px 5px;
+  background: var(--soft);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.flag { color: var(--warn); }
+.meta { margin: 12px 2px; color: var(--muted); font-size: 0.88rem; }
+.empty { padding: 30px; text-align: center; background: var(--panel); border-radius: var(--radius); }
+
+/* =========================================================
+   4. ПЛАВАЮЩИЙ НИЖНИЙ БАР КОРЗИНЫ (FLOATING DOCK)
+========================================================= */
+.cart-bar {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 720px;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+  border-radius: 50px;
+  box-shadow: var(--shadow-lg);
+  z-index: 80;
+  padding: 8px 14px;
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translate(-50%, 60px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+.cart-bar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart-bar-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.cart-icon { font-size: 1.4rem; }
+.cart-bar-info b { font-size: 1rem; }
+.cart-bar-sum {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1.15rem;
+  margin-left: 6px;
+}
+
+.btn-open-cart {
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  border-radius: 30px;
+}
+
+/* =========================================================
+   5. ШТОРКА ЧЕКА (MODAL BOTTOM SHEET)
+========================================================= */
+.modal-bottom {
+  align-items: flex-end;
+  padding: 0;
+}
+
+.modal-bottom .sheet {
+  max-width: 720px;
+  max-height: 85vh;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  animation: drawerUp 0.25s ease-out;
+  padding: 14px 16px 20px;
+}
+
+@keyframes drawerUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.drawer-handle {
+  width: 44px;
+  height: 5px;
+  background: var(--line-strong);
+  border-radius: 5px;
+  margin: 0 auto 10px;
+}
+
+.sheet-head-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 8px;
-}
-
-.rhead-title { display: flex; align-items: baseline; gap: 8px; }
-.rhead-title h2 { margin: 0; font-size: 1.15rem; }
-.rt { color: var(--muted); font-size: 0.82rem; }
-
-.rtier-box {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.9rem;
+  align-items: baseline;
 }
 
 .rclient-box {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  margin-bottom: 10px;
 }
 
 .rlist {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 320px;
+  max-height: 40vh;
   overflow-y: auto;
+  margin-bottom: 12px;
 }
 
-/* Строка позиции чека */
+/* Строка товара в чеке */
 .cl {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: var(--card-bg);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
 
-.cl-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.item-title {
+.cl-info {
   min-width: 0;
-  font-size: 0.95rem;
+  flex: 1;
 }
 
-.item-title b { word-break: break-word; }
-.cf { color: var(--muted); font-size: 0.82rem; margin-right: 4px; }
+.cl-info b { font-size: 0.95rem; word-break: break-word; }
 
-.btn-del-cart {
-  padding: 6px 10px;
-  line-height: 1;
-  border-radius: 6px;
-}
-
-/* Строка с полями ввода: крупно и удобно */
-.cr {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-  background: var(--panel);
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-}
-
-.cr-block {
+.cl-controls {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
-.cr-label {
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-/* Поле цены */
-.cr input.p {
-  width: 90px;
-  height: 38px;
-  padding: 4px 6px;
-  font-size: 1rem;
-  font-weight: 700;
-  text-align: right;
-  border-radius: 6px;
-}
-
-/* Степпер для количества [-] [ 1 ] [+] */
+/* Степпер количества */
 .qty-stepper {
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--line);
   border-radius: 6px;
   overflow: hidden;
+  background: var(--panel);
 }
 
 .btn-step {
-  width: 34px;
-  height: 38px;
+  width: 32px;
+  height: 36px;
   padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--card-bg);
   border: none;
+  background: transparent;
   font-size: 1.1rem;
   font-weight: bold;
 }
 
-.cr input.q {
-  width: 50px;
-  height: 38px;
+.cl input.q {
+  width: 44px;
+  height: 36px;
   padding: 0;
   border: none;
   border-left: 1px solid var(--line);
   border-right: 1px solid var(--line);
-  border-radius: 0;
   text-align: center;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
-.cr-sum {
-  font-size: 1.1rem;
+.cl-sum {
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--accent);
-  margin-left: auto;
-  white-space: nowrap;
+  min-width: 75px;
+  text-align: right;
 }
 
-/* Подвал чека */
+.btn-del-cart {
+  padding: 6px 9px;
+  line-height: 1;
+  border-radius: 6px;
+}
+
 .rfoot {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
   border-top: 1.5px solid var(--line);
   padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .rfoot .total {
-  font-size: 1.15rem;
-  font-weight: 700;
   display: flex;
+  justify-content: space-between;
   align-items: baseline;
-  gap: 6px;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .rfoot .total b {
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   color: var(--accent);
 }
 
@@ -504,197 +640,10 @@ summary {
   gap: 6px;
 }
 
-/* =========================================================
-   5. ТАБЛИЦА / КАРТОЧКИ ТОВАРОВ
-========================================================= */
-section.firm {
-  margin-bottom: 24px;
-}
-
-section.firm h2 {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: 0 0 10px;
-  padding-left: 8px;
-  border-left: 4px solid var(--accent);
-  font-size: 1.2rem;
-}
-
-section.firm h2 .gc {
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-weight: normal;
-}
-
-.tablebox {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-
-/* ДЕСКТОП: Стандартная таблица */
-@media (min-width: 721px) {
-  .tablebox table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-
-  thead th {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    background: var(--panel);
-    color: var(--muted);
-    font-size: 0.85rem;
-    padding: 10px;
-    border-bottom: 2px solid var(--line);
-    text-align: left;
-  }
-
-  thead th.num { text-align: right; }
-  td {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--line);
-    vertical-align: middle;
-  }
-
-  td.num {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-    border-left: 1px dashed var(--line);
-  }
-
-  .col-id-th, td.col-id { width: 70px; text-align: center; }
-  .col-price-th { width: 95px; }
-  .col-markup-th, td.col-markup { width: 80px; text-align: right; border-left: 1px dashed var(--line); }
-  .col-act, td.act { width: 110px; text-align: center; border-left: 1px solid var(--line); }
-  .price-val.bold { color: var(--accent); font-weight: 700; }
-  .m-prices-block { display: none; }
-}
-
-/* МОБИЛКА: Таблица превращается в удобные карточки товаров */
-@media (max-width: 720px) {
-  .tablebox {
-    background: transparent;
-    border: none;
-  }
-
-  .tablebox table, 
-  .tablebox tbody, 
-  .tablebox tr, 
-  .tablebox td {
-    display: block;
-    width: 100%;
-  }
-
-  .tablebox thead {
-    display: none; /* Прячем десктопную шапку на смартфонах */
-  }
-
-  .tablebox tr {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 12px;
-    margin-bottom: 10px;
-    box-shadow: var(--shadow);
-  }
-
-  /* Строка ID и названия */
-  td.col-id {
-    display: inline-block;
-    width: auto;
-    padding: 0;
-    margin-bottom: 4px;
-    border: none;
-  }
-
-  td.name {
-    padding: 0;
-    border: none;
-    margin-bottom: 10px;
-  }
-
-  td.name b {
-    font-size: 1.05rem;
-    display: block;
-    margin-top: 2px;
-  }
-
-  /* Скрываем одиночные колонки таблицы на мобилках */
-  td.col-p1, td.col-p2, td.col-p3, td.col-markup {
-    display: none;
-  }
-
-  /* Показываем карточный блок с тремя ценами */
-  .m-prices-block {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
-    background: var(--card-bg);
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    margin-bottom: 10px;
-    text-align: center;
-  }
-
-  .m-price-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .m-price-item span {
-    font-size: 0.72rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-
-  .m-price-item b {
-    font-size: 0.98rem;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .m-price-item.retail b {
-    color: var(--accent);
-    font-weight: 800;
-  }
-
-  td.act {
-    padding: 0;
-    border: none;
-    display: flex;
-    gap: 8px;
-  }
-
-  td.act button.btn-add {
-    flex: 1;
-    padding: 10px;
-    font-size: 0.95rem;
-  }
-}
-
-.pid {
-  display: inline-block;
-  padding: 2px 5px;
-  background: var(--soft);
-  color: var(--muted);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 11px;
-}
-
-.flag { color: var(--warn); margin-right: 4px; }
-.meta { margin: 12px 2px; color: var(--muted); font-size: 0.9rem; }
-.empty { padding: 30px; text-align: center; background: var(--panel); border-radius: var(--radius); }
+.rtools button { flex: 1; text-align: center; }
 
 /* =========================================================
-   6. МОДАЛКИ И ЧЕК-ЛИСТ (TODO)
+   6. МОДАЛКИ: ЧЕК-ЛИСТ СБОРКИ (TODO)
 ========================================================= */
 .modal {
   position: fixed;
@@ -709,8 +658,8 @@ section.firm h2 .gc {
 
 .sheet {
   width: 100%;
-  max-width: 520px;
-  max-height: 92vh;
+  max-width: 540px;
+  max-height: 90vh;
   overflow-y: auto;
   padding: 18px;
   background: var(--panel);
@@ -718,44 +667,17 @@ section.firm h2 .gc {
   box-shadow: var(--shadow-lg);
 }
 
-.v-header {
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 8px;
-  margin-bottom: 10px;
-}
-
+.v-header { border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 10px; }
 .sheet h2 { margin: 0; font-size: 1.25rem; }
-.sheet .when { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
-
-.v-client-info {
-  background: var(--card-bg);
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
-}
+.v-client-info { background: var(--card-bg); padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; }
 
 .modal-table-wrap { overflow-x: auto; }
 .sheet table { width: 100%; border-collapse: collapse; }
 .sheet th, .sheet td { padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
 .sheet .total { display: flex; justify-content: space-between; margin-top: 14px; font-weight: 700; font-size: 1.2rem; }
 
-/* Чек-лист сборки (TODO) */
-.todo-hint {
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin: 0 0 10px;
-}
-
-.todo-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 52vh;
-  overflow-y: auto;
-  margin-bottom: 14px;
-}
+.todo-hint { font-size: 0.85rem; color: var(--muted); margin: 0 0 10px; }
+.todo-list { display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto; margin-bottom: 14px; }
 
 .todo-item {
   display: flex;
@@ -767,15 +689,8 @@ section.firm h2 .gc {
   border: 1.5px solid var(--line);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
   user-select: none;
-}
-
-.todo-item-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
+  transition: all 0.2s ease;
 }
 
 .todo-check-icon {
@@ -790,10 +705,8 @@ section.firm h2 .gc {
   font-weight: bold;
   font-size: 16px;
   color: transparent;
-  flex-shrink: 0;
 }
 
-/* Отмеченный товар опускается вниз и получает стили */
 .todo-item.done {
   opacity: 0.55;
   background: var(--soft);
@@ -806,33 +719,15 @@ section.firm h2 .gc {
   color: #fff;
 }
 
-.todo-item.done .todo-item-name b {
-  text-decoration: line-through;
-}
-
-.todo-item-qty {
-  font-weight: 700;
-  color: var(--accent);
-  white-space: nowrap;
-}
-
-.todo-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  border-top: 1.5px solid var(--line);
-  padding-top: 10px;
-}
+.todo-item.done b { text-decoration: line-through; }
+.todo-footer { display: flex; justify-content: space-between; gap: 8px; border-top: 1.5px solid var(--line); padding-top: 10px; }
 
 /* =========================================================
-   7. АДАПТИВНОСТЬ НАВИГАЦИИ И ЭКРАНОВ
+   7. АДАПТИВНОСТЬ ПОД ТЕЛЕФОНЫ
 ========================================================= */
 @media (max-width: 1024px) {
-  .layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  .layout { grid-template-columns: minmax(0, 1fr); }
 
-  /* На смартфонах навигация по фирмам — горизонтальная полоса со скроллом */
   .nav {
     position: sticky;
     top: 0;
@@ -849,7 +744,6 @@ section.firm h2 .gc {
     overflow-x: auto;
     white-space: nowrap;
     scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
   }
   .nav ul::-webkit-scrollbar { display: none; }
 
@@ -861,26 +755,23 @@ section.firm h2 .gc {
 }
 
 @media (max-width: 600px) {
-  .wrap { padding: 8px 8px 40px; }
+  .wrap { padding: 8px 8px 30px; }
   .bar-search { flex-direction: column; }
   .bar-search #cat { max-width: 100%; }
+  .rclient-box { grid-template-columns: 1fr; }
   
-  .rclient-box {
-    grid-template-columns: 1fr;
+  .p-row {
+    padding: 8px 10px;
   }
 
-  .rtools {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-  .rtools button { text-align: center; }
+  .p-main-price { font-size: 1.05rem; }
+  .btn-add-compact { padding: 8px 10px; }
 }
 
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 20px;
+  bottom: 80px;
   z-index: 120;
   padding: 10px 18px;
   transform: translateX(-50%);
