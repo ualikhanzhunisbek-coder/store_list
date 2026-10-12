@@ -10,12 +10,12 @@
 <div class="wrap">
   <header class="page-header">
     <div class="header-top">
-      <div class="brand">
+      <div>
         <h1>Прайс-лист</h1>
-        <p class="sub">Закупка / Опт / Розница</p>
+        <p class="sub">Быстрый поиск и сборка заказов</p>
       </div>
 
-      <!-- Темы -->
+      <!-- Темы оформления -->
       <div class="theme-picker" aria-label="Выбор темы">
         <button type="button" class="theme-btn active" data-theme="emerald" title="Изумруд">🌿</button>
         <button type="button" class="theme-btn" data-theme="sapphire" title="Сапфир">🌊</button>
@@ -27,23 +27,33 @@
     <!-- Поиск и фильтры -->
     <div class="top-controls">
       <div class="bar bar-search">
-        <input id="q" type="search" placeholder="Поиск: творог, 1-12, сыр…" autocomplete="off">
+        <input id="q" type="search" placeholder="Поиск товара или ID…" autocomplete="off">
         <select id="cat"><option value="">Все категории</option></select>
       </div>
 
+      <!-- Переключатель активной цены (Розница / Опт / Закупка) -->
+      <div class="tier-selector-bar">
+        <span class="tier-label">Режим цен:</span>
+        <div class="tier-pills">
+          <button type="button" class="btn-tier active" data-tier="p3">Розница</button>
+          <button type="button" class="btn-tier" data-tier="p2">Опт</button>
+          <button type="button" class="btn-tier" data-tier="p1">Закупка</button>
+        </div>
+      </div>
+
       <details id="addBox">
-        <summary>+ Добавить новый товар</summary>
+        <summary>+ Новый товар</summary>
         <div class="form">
-          <input id="n_id" placeholder="ID (например: 9-1)">
+          <input id="n_id" placeholder="ID (9-1)">
           <input id="n_firm" list="firms" placeholder="Фирма">
           <datalist id="firms"></datalist>
           <input id="n_name" placeholder="Название товара">
           <input id="n_cat" placeholder="Категория">
-          <input id="n_p1" type="number" min="0" step="any" placeholder="Цена закупки">
-          <input id="n_p2" type="number" min="0" step="any" placeholder="Цена опта">
-          <input id="n_p3" type="number" min="0" step="any" placeholder="Цена розницы">
+          <input id="n_p1" type="number" min="0" step="any" placeholder="Закупка">
+          <input id="n_p2" type="number" min="0" step="any" placeholder="Опт">
+          <input id="n_p3" type="number" min="0" step="any" placeholder="Розница">
           <input id="n_note" placeholder="Примечание">
-          <button class="primary" id="add" style="grid-column: 1 / -1; padding: 12px;">Сохранить товар</button>
+          <button class="primary" id="add" style="grid-column: 1 / -1; padding: 11px;">Сохранить в базу</button>
         </div>
       </details>
 
@@ -57,53 +67,14 @@
   </header>
 
   <div class="layout">
-    <!-- Меню фирм (на мобильных: горизонтальные чипсы-кнопки со скроллом) -->
+    <!-- Меню фирм (на мобилках скроллится в горизонтальной строке) -->
     <aside class="nav" aria-label="Фирмы">
       <h3>Фирмы</h3>
       <ul id="navlist"></ul>
     </aside>
 
     <main class="main">
-      <!-- Блок чека заказа -->
-      <div id="receiptSlot" class="receipt-slot">
-        <section id="receipt" hidden>
-          <div class="rhead">
-            <div class="rhead-title">
-              <h2>Чек заказа</h2>
-              <span class="rt" id="rtime"></span>
-            </div>
-            <div class="rtier-box">
-              <label for="rtier">Тип цен:</label>
-              <select id="rtier">
-                <option value="p3">Розница</option>
-                <option value="p2">Опт</option>
-                <option value="p1">Закупка</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="rclient-box">
-            <input id="rClientName" type="text" placeholder="Имя клиента">
-            <input id="rClientPhone" type="tel" placeholder="Телефон">
-          </div>
-
-          <!-- Список позиций в чеке -->
-          <div class="rlist" id="rrows"></div>
-
-          <!-- Итого и действия -->
-          <div class="rfoot">
-            <div class="total"><span>Итого:</span><b id="rtotal">0 ₸</b></div>
-            <div class="rtools">
-              <button class="btn-todo-open" id="rOpenTodo" type="button">📋 Сборка</button>
-              <button class="primary" id="rshow" type="button">Накладная</button>
-              <button id="rcopy" type="button">Копировать</button>
-              <button class="danger" id="rclear" type="button">Очистить</button>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <!-- Таблица / Карточки товаров -->
+      <!-- Список товаров (компактные быстрые строки) -->
       <div id="list"></div>
       <div id="empty" class="empty" hidden>Ничего не найдено</div>
       <div class="meta" id="count"></div>
@@ -111,7 +82,54 @@
   </div>
 </div>
 
-<!-- Модальное окно: Накладная -->
+<!-- ПЛАВАЮЩИЙ НИЖНИЙ БАР ЧЕКА (МОБИЛЬНЫЙ / ДЕСКТОПНЫЙ) -->
+<div id="cartBar" class="cart-bar" hidden>
+  <div class="cart-bar-content">
+    <div class="cart-bar-info" id="cartBarInfo">
+      <span class="cart-icon">🛒</span>
+      <div>
+        <b id="cartBarCount">0 шт</b>
+        <span class="cart-bar-sum" id="cartBarSum">0 ₸</span>
+      </div>
+    </div>
+    <div class="cart-bar-actions">
+      <button class="primary btn-open-cart" id="openCartDrawerBtn" type="button">Открыть чек ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНАЯ ШТОРКА ЧЕКА -->
+<div id="cartDrawer" class="modal modal-bottom" hidden role="dialog" aria-modal="true">
+  <div class="sheet sheet-cart">
+    <div class="drawer-handle"></div>
+    <div class="v-header">
+      <div class="sheet-head-row">
+        <h2>Чек заказа</h2>
+        <span class="rt" id="rtime"></span>
+      </div>
+    </div>
+
+    <div class="rclient-box">
+      <input id="rClientName" type="text" placeholder="Имя клиента">
+      <input id="rClientPhone" type="tel" placeholder="Телефон">
+    </div>
+
+    <div class="rlist" id="rrows"></div>
+
+    <div class="rfoot">
+      <div class="total"><span>Итого:</span><b id="rtotal">0 ₸</b></div>
+      <div class="rtools">
+        <button class="btn-todo-open" id="rOpenTodo" type="button">📋 Сборка</button>
+        <button class="primary" id="rshow" type="button">Накладная</button>
+        <button id="rcopy" type="button">Копировать</button>
+        <button class="danger" id="rclear" type="button">Очистить</button>
+        <button id="closeCartDrawerBtn" class="btn-close-drawer" type="button">Свернуть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО: НАКЛАДНАЯ -->
 <div id="viewer" class="modal" hidden role="dialog" aria-modal="true">
   <div class="sheet">
     <div class="v-header">
@@ -142,7 +160,7 @@
   </div>
 </div>
 
-<!-- Модальное окно: Чек-лист сборки -->
+<!-- МОДАЛЬНОЕ ОКНО: ЧЕК-ЛИСТ СБОРКИ (TODO) -->
 <div id="todoModal" class="modal" hidden role="dialog" aria-modal="true">
   <div class="sheet sheet-todo">
     <div class="v-header">
@@ -155,11 +173,11 @@
       <div id="todoClientPhoneRow"><b>Телефон:</b> <span id="todoClientPhone"></span></div>
     </div>
 
-    <p class="todo-hint">Нажмите на товар, чтобы отметить его — он автоматически уйдет вниз.</p>
+    <p class="todo-hint">Нажатый товар мгновенно уходит вниз списка.</p>
     <div class="todo-list" id="todoRows"></div>
 
     <div class="todo-footer">
-      <button id="todoResetBtn" type="button" class="btn-todo-reset">Сбросить галочки</button>
+      <button id="todoResetBtn" type="button" class="btn-todo-reset">Сбросить отметки</button>
       <button class="primary btn-large" id="todoCloseBtn" type="button">Готово</button>
     </div>
   </div>
