@@ -1,5 +1,5 @@
 const KEY = "price-list-v8";
-const THEME_KEY = "app-theme-v2";
+const THEME_KEY = "app-theme-v3";
 const NOFIRM = "Без фирмы";
 
 function uid(){ return Math.random().toString(36).slice(2,10); }
@@ -62,6 +62,7 @@ function save(){
 let items = load();
 let sortKey = "id", sortDir = 1;
 let editMode = false;
+let activeTier = "p3"; // По умолчанию: p3 (Розница), p2 (Опт), p1 (Закупка)
 
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -83,9 +84,7 @@ function initTheme() {
   setTheme(savedTheme);
 
   document.querySelectorAll(".theme-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      setTheme(btn.dataset.theme);
-    });
+    btn.addEventListener("click", () => setTheme(btn.dataset.theme));
   });
 }
 
@@ -97,6 +96,17 @@ function setTheme(theme) {
   });
 }
 initTheme();
+
+/* =========================================================
+   ПЕРЕКЛЮЧАТЕЛЬ ТАРИФА ЦЕН (РОЗНИЦА / ОПТ / ЗАКУПКА)
+========================================================= */
+document.querySelectorAll(".btn-tier").forEach(btn => {
+  btn.addEventListener("click", () => {
+    activeTier = btn.dataset.tier;
+    document.querySelectorAll(".btn-tier").forEach(b => b.classList.toggle("active", b.dataset.tier === activeTier));
+    render();
+  });
+});
 
 function minIdOfFirm(firmName) {
   const firmItems = items.filter(p => firmOf(p) === firmName);
@@ -160,51 +170,40 @@ function renderCats(){
   if($("firms")) $("firms").innerHTML = allFirms().map(f=>`<option value="${esc(f)}">`).join("");
 }
 
-// Рендер строки (включает мобильный блок цен m-prices-block)
+// Рендер плотной быстрой строки товара
 function rowHTML(p){
   const pr = problem(p);
+  const curPrice = p[activeTier] || 0;
 
-  const nameCol = `<td class="name">
-    <div class="name-content">
-      ${pr?`<span class="flag" title="${pr}">⚠</span>`:""}<b>${hl(p.name)}</b>
-      <div class="sub2" style="font-size:0.8rem;color:var(--muted);margin-top:2px;">
-        <span class="cat">${hl(p.cat)}</span>
-        ${editMode 
-          ? `<input class="note" data-f="note" value="${esc(p.note)}" placeholder="примечание">`
-          : (p.note ? `<span class="note-text" style="font-style:italic"> · ${esc(p.note)}</span>` : "")}
+  // Второстепенные цены мелким шрифтом
+  const subPrices = activeTier === "p3"
+    ? `Опт: ${fmt(p.p2)} · Зак: ${fmt(p.p1)}`
+    : activeTier === "p2"
+    ? `Розн: ${fmt(p.p3)} · Зак: ${fmt(p.p1)}`
+    : `Розн: ${fmt(p.p3)} · Опт: ${fmt(p.p2)}`;
+
+  return `<div class="p-row ${pr ? "bad" : ""}" data-id="${esc(p.id)}">
+    <div class="p-info">
+      <div class="p-title">
+        <span class="pid">${hl(p.id)}</span>
+        ${pr ? `<span class="flag" title="${pr}">⚠</span>` : ""}
+        <b>${hl(p.name)}</b>
+      </div>
+      <div class="p-sub">
+        <span>${hl(p.cat || "")}</span>
+        ${p.note ? ` · <i>${esc(p.note)}</i>` : ""}
       </div>
     </div>
-  </td>`;
 
-  // Десктопные колонки цен
-  const pricesCol = editMode
-    ? `<td class="num col-p1"><input class="p" data-f="p1" type="number" min="0" step="any" value="${p.p1}"></td>
-       <td class="num col-p2"><input class="p" data-f="p2" type="number" min="0" step="any" value="${p.p2}"></td>
-       <td class="num col-p3"><input class="p" data-f="p3" type="number" min="0" step="any" value="${p.p3}"></td>`
-    : `<td class="num col-p1"><span class="price-val">${fmt(p.p1)}</span></td>
-       <td class="num col-p2"><span class="price-val">${fmt(p.p2)}</span></td>
-       <td class="num col-p3"><span class="price-val bold">${fmt(p.p3)}</span></td>`;
-
-  // Мобильный блок цен для отображения карточкой
-  const mobilePrices = `<div class="m-prices-block">
-    <div class="m-price-item"><span>Закупка</span><b>${fmt(p.p1)}</b></div>
-    <div class="m-price-item"><span>Опт</span><b>${fmt(p.p2)}</b></div>
-    <div class="m-price-item retail"><span>Розница</span><b>${fmt(p.p3)} ₸</b></div>
+    <div class="p-pricing">
+      <div class="p-cost-box">
+        <span class="p-main-price">${fmt(curPrice)} ₸</span>
+        <span class="p-sub-prices">${subPrices}</span>
+      </div>
+      <button class="primary btn-add-compact" data-add>+ Чек</button>
+      ${editMode ? `<button class="danger" data-del style="padding:6px 8px;">✕</button>` : ""}
+    </div>
   </div>`;
-
-  const actCol = `<td class="act">
-    <button class="primary btn-add" data-add>+ В чек</button>
-    ${editMode ? `<button class="danger btn-del" data-del title="Удалить">✕</button>` : ""}
-  </td>`;
-
-  return `<tr data-id="${esc(p.id)}" class="${pr?"bad":""}">
-    <td class="col-id"><span class="pid">${hl(p.id)}</span></td>
-    ${nameCol}
-    ${pricesCol}
-    <td class="num col-markup">${p.p1>0?Math.round(markup(p))+"%":"—"}</td>
-    ${mobilePrices}
-    ${actCol}
-  </tr>`;
 }
 
 function render(){
@@ -225,18 +224,9 @@ function render(){
       const g = groups.get(f);
       return `<section class="firm" data-firm="${esc(f)}">
         <h2>${esc(f)} <span class="gc">${g.length}</span></h2>
-        <div class="tablebox"><table>
-          <thead><tr>
-            <th data-k="id" class="col-id-th">ID</th>
-            <th data-k="name">Название</th>
-            <th data-k="p1" class="num col-price-th">Закупка</th>
-            <th data-k="p2" class="num col-price-th">Опт</th>
-            <th data-k="p3" class="num col-price-th">Розница</th>
-            <th data-k="m" class="num col-markup-th">Наценка</th>
-            <th class="col-act"></th>
-          </tr></thead>
-          <tbody>${g.map(rowHTML).join("")}</tbody>
-        </table></div>
+        <div class="item-list">
+          ${g.map(rowHTML).join("")}
+        </div>
       </section>`;
     }).join("");
   }
@@ -244,19 +234,9 @@ function render(){
   if($("empty")) $("empty").hidden = list.length > 0;
   const bad = items.filter(problem).length;
   if($("count")) {
-    $("count").textContent = `Показано ${list.length} из ${items.length} · фирм: ${groups.size}` + (bad ? ` · подозрительных цен: ${bad}` : "");
+    $("count").textContent = `Показано ${list.length} из ${items.length} · подозрительных цен: ${bad}`;
   }
-  updateActive();
 }
-
-function updateActive(){
-  const secs = [...document.querySelectorAll("#list section")];
-  let cur = secs.length ? secs[0].dataset.firm : null;
-  secs.forEach(s=>{ if (s.getBoundingClientRect().top <= 140) cur = s.dataset.firm; });
-  document.querySelectorAll("#navlist button").forEach(b=>b.classList.toggle("active", b.dataset.firm===cur));
-}
-
-window.addEventListener("scroll", updateActive, {passive:true});
 
 // Режим редактора
 if($("editModeBtn")) {
@@ -264,7 +244,7 @@ if($("editModeBtn")) {
     editMode = !editMode;
     $("editModeBtn").classList.toggle("active", editMode);
     $("editModeBtn").textContent = editMode ? "✏️ Редактор: ВКЛ" : "🔒 Редактор: ВЫКЛ";
-    toast(editMode ? "Редактор включён" : "Редактор выключен");
+    toast(editMode ? "Режим редактора включён" : "Режим редактора выключен");
     render();
   });
 }
@@ -279,24 +259,16 @@ if($("navlist")) {
 }
 
 if($("list")) {
-  $("list").addEventListener("change", e=>{
-    const f = e.target.dataset.f; if(!f) return;
-    const tr = e.target.closest("tr"); if(!tr) return;
-    const p = items.find(x=>x.id===tr.dataset.id); if(!p) return;
-    if (f === "note"){ p.note = e.target.value.trim(); save(); toast("Сохранено"); return; }
-    const v = Number(e.target.value);
-    if (e.target.value==="" || !isFinite(v) || v < 0){ toast("Введите число ≥ 0"); render(); return; }
-    p[f] = v; save(); toast("Сохранено"); render();
-  });
-
   $("list").addEventListener("click", e=>{
-    const th = e.target.closest("th[data-k]");
-    if (th){ const k=th.dataset.k; sortDir = sortKey===k ? -sortDir : 1; sortKey=k; render(); return; }
-    if(e.target.matches("[data-add]")){ addToCart(e.target.closest("tr").dataset.id); return; }
-    if(!e.target.matches("[data-del]")) return;
-    const id = e.target.closest("tr").dataset.id;
-    const p = items.find(x=>x.id===id);
-    if(confirm(`Удалить «${p.name}» (ID: ${p.id})?`)){ items = items.filter(x=>x.id!==id); save(); renderCats(); render(); }
+    const row = e.target.closest(".p-row");
+    if (!row) return;
+    const id = row.dataset.id;
+
+    if(e.target.matches("[data-add]")){ addToCart(id); return; }
+    if(e.target.matches("[data-del]")){
+      const p = items.find(x=>x.id===id);
+      if(confirm(`Удалить «${p.name}» (ID: ${p.id})?`)){ items = items.filter(x=>x.id!==id); save(); renderCats(); render(); }
+    }
   });
 }
 
@@ -325,7 +297,7 @@ if($("add")) {
 
 if($("reset")) {
   $("reset").addEventListener("click",()=>{
-    if(confirm("Вернуть исходный прайс из data.js? Ваши правки будут потеряны.")){
+    if(confirm("Вернуть исходный прайс из data.js?")){
       items=seed(); save(); renderCats(); render(); toast("Исходный прайс загружен");
     }
   });
@@ -338,13 +310,11 @@ if($("clear")) {
 }
 
 /* =========================================================
-   ЧЕК И КОРЗИНА
+   КОРЗИНА И ПЛАВАЮЩИЙ БАР
 ========================================================= */
-const CKEY = "receipt-v12";
-const TKEY = "receipt-time-v12";
-const CLIENT_KEY = "receipt-client-v12";
-
-let tier = "p3";
+const CKEY = "receipt-v14";
+const TKEY = "receipt-time-v14";
+const CLIENT_KEY = "receipt-client-v14";
 
 let clientInfo = (function(){
   try { return JSON.parse(localStorage.getItem(CLIENT_KEY)) || { name: "", phone: "" }; } catch(e){ return { name: "", phone: "" }; }
@@ -378,19 +348,22 @@ function saveCart(){
 const r2 = n => Math.round(n*100)/100;
 function lineSum(c){ return r2(c.price*c.qty); }
 function cartTotal(){ return r2(cart.reduce((s,c)=>s+lineSum(c),0)); }
-function listPrice(c){ const p = items.find(x=>x.id===c.pid); return p ? p[tier] : null; }
 
 function renderCart(){
-  const rec = $("receipt");
-  if (!rec) return;
-
+  const bar = $("cartBar");
   if (!cart.length) {
-    rec.hidden = true;
+    if (bar) bar.hidden = true;
+    closeCartDrawer();
     return;
   }
-  rec.hidden = false;
 
-  if($("rtier")) $("rtier").value = tier;
+  // Обновление плавающего бара внизу
+  if (bar) bar.hidden = false;
+  const totalCount = cart.reduce((s, c) => s + c.qty, 0);
+  if($("cartBarCount")) $("cartBarCount").textContent = `${totalCount} шт`;
+  if($("cartBarSum")) $("cartBarSum").textContent = `${fmt(cartTotal())} ₸`;
+
+  // Обновление шторки
   if($("rtime")) $("rtime").textContent = cartTime ? fmtTime(cartTime) : "";
   if($("rClientName")) $("rClientName").value = clientInfo.name || "";
   if($("rClientPhone")) $("rClientPhone").value = clientInfo.phone || "";
@@ -398,32 +371,18 @@ function renderCart(){
   if($("rrows")) {
     $("rrows").innerHTML = cart.map(c=>{
       return `<div class="cl" data-cid="${c.cid}">
-        <div class="cl-top">
-          <div class="item-title">
-            <span class="pid">#${esc(c.pid)}</span>
-            ${c.firm?`<span class="cf">${esc(c.firm)}</span>`:""}
-            <b>${esc(c.name)}</b>
-          </div>
-          <button class="danger btn-del-cart" data-cdel title="Удалить" aria-label="Удалить">✕</button>
+        <div class="cl-info">
+          <b>${esc(c.name)}</b>
+          <div style="font-size:0.8rem;color:var(--muted)">${fmt(c.price)} ₸ / шт</div>
         </div>
-        <div class="cr">
-          <div class="cr-block">
-            <span class="cr-label">Цена:</span>
-            <input class="p" data-cf="price" type="number" min="0" step="any" value="${c.price}">
+        <div class="cl-controls">
+          <div class="qty-stepper">
+            <button type="button" class="btn-step" data-step="-1">−</button>
+            <input class="q" data-cf="qty" type="number" min="1" step="any" value="${c.qty}">
+            <button type="button" class="btn-step" data-step="1">+</button>
           </div>
-
-          <div class="cr-block">
-            <span class="cr-label">Кол-во:</span>
-            <div class="qty-stepper">
-              <button type="button" class="btn-step" data-step="-1">−</button>
-              <input class="q" data-cf="qty" type="number" min="1" step="any" value="${c.qty}">
-              <button type="button" class="btn-step" data-step="1">+</button>
-            </div>
-          </div>
-
-          <div class="cr-sum">
-            <b data-sum>${fmt(lineSum(c))} ₸</b>
-          </div>
+          <b class="cl-sum">${fmt(lineSum(c))} ₸</b>
+          <button class="danger btn-del-cart" data-cdel>✕</button>
         </div>
       </div>`;
     }).join("");
@@ -435,14 +394,22 @@ function addToCart(id){
   const p = items.find(x=>x.id===id); if(!p) return;
   const ex = cart.find(c=>c.pid===id);
   if (ex) ex.qty += 1;
-  else cart.push({cid:uid(), pid:id, firm:firmOf(p), name:p.name, price:p[tier], qty:1, done:false});
+  else cart.push({cid:uid(), pid:id, firm:firmOf(p), name:p.name, price:p[activeTier], qty:1, done:false});
   saveCart(); renderCart(); toast("Добавлено в чек");
 }
+
+/* Управление шторкой чека */
+function openCartDrawer(){ if($("cartDrawer")) $("cartDrawer").hidden = false; }
+function closeCartDrawer(){ if($("cartDrawer")) $("cartDrawer").hidden = true; }
+
+if($("openCartDrawerBtn")) $("openCartDrawerBtn").addEventListener("click", openCartDrawer);
+if($("cartBarInfo")) $("cartBarInfo").addEventListener("click", openCartDrawer);
+if($("closeCartDrawerBtn")) $("closeCartDrawerBtn").addEventListener("click", closeCartDrawer);
+if($("cartDrawer")) $("cartDrawer").addEventListener("click", e=>{ if(e.target === $("cartDrawer")) closeCartDrawer(); });
 
 if($("rClientName")) $("rClientName").addEventListener("input", e=>{ clientInfo.name = e.target.value.trim(); saveCart(); });
 if($("rClientPhone")) $("rClientPhone").addEventListener("input", e=>{ clientInfo.phone = e.target.value.trim(); saveCart(); });
 
-// Клики в чеке: удаление и кнопки плюс/минус
 if($("rrows")) {
   $("rrows").addEventListener("click", e=>{
     const row = e.target.closest(".cl"); if(!row) return;
@@ -460,24 +427,12 @@ if($("rrows")) {
   });
 
   $("rrows").addEventListener("input", e=>{
-    const f = e.target.dataset.cf; if(!f) return;
     const row = e.target.closest(".cl"); if(!row) return;
     const c = cart.find(x=>x.cid===row.dataset.cid); if(!c) return;
     const v = Number(e.target.value);
-    if (e.target.value==="" || !isFinite(v) || v < 0) return;
-    c[f] = v;
-    const sumEl = row.querySelector("[data-sum]");
-    if (sumEl) sumEl.textContent = fmt(lineSum(c)) + " ₸";
-    if($("rtotal")) $("rtotal").textContent = fmt(cartTotal()) + " ₸";
-    saveCart();
-  });
-}
-
-if($("rtier")) {
-  $("rtier").addEventListener("change", e=>{
-    tier = e.target.value;
-    cart.forEach(c=>{ const p = items.find(x=>x.id===c.pid); if(p) c.price = p[tier]; });
-    saveCart(); renderCart(); toast("Цены пересчитаны");
+    if (e.target.value==="" || !isFinite(v) || v < 1) return;
+    c.qty = v;
+    saveCart(); renderCart();
   });
 }
 
@@ -517,7 +472,7 @@ if($("vclose")) $("vclose").addEventListener("click", closeReceipt);
 if($("viewer")) $("viewer").addEventListener("click", e=>{ if(e.target === $("viewer")) closeReceipt(); });
 
 /* =========================================================
-   МОДАЛКА: ЧЕК-ЛИСТ СБОРКИ (TODO С ПЕРЕНОСОМ ВНИЗ)
+   МОДАЛКА: ЧЕК-ЛИСТ СБОРКИ (TODO)
 ========================================================= */
 function updateTodoViewStats(){
   const doneCount = cart.filter(c => c.done).length;
@@ -540,7 +495,7 @@ function renderTodoModal(){
       return;
     }
 
-    // СОРТИРОВКА: Несобранное (done: false) сверху, собранное (done: true) снизу!
+    // Сортировка: несобранные сверху, собранные снизу!
     const sorted = [...cart].sort((a, b) => {
       if (a.done === b.done) return 0;
       return a.done ? 1 : -1;
@@ -548,14 +503,12 @@ function renderTodoModal(){
 
     $("todoRows").innerHTML = sorted.map(c => `
       <div class="todo-item ${c.done ? "done" : ""}" data-tcid="${c.cid}">
-        <div class="todo-item-left">
+        <div style="display:flex;align-items:center;gap:10px;">
           <span class="todo-check-icon">${c.done ? "✓" : ""}</span>
-          <div class="todo-item-name">
-            <span class="pid">#${esc(c.pid)}</span>
-            <b>${esc(c.name)}</b>
-          </div>
+          <span class="pid">#${esc(c.pid)}</span>
+          <b>${esc(c.name)}</b>
         </div>
-        <div class="todo-item-qty">${c.qty} шт</div>
+        <div style="font-weight:700;color:var(--accent);">${c.qty} шт</div>
       </div>
     `).join("");
   }
@@ -568,22 +521,20 @@ if($("rOpenTodo")) $("rOpenTodo").addEventListener("click", openTodoModal);
 if($("todoCloseBtn")) $("todoCloseBtn").addEventListener("click", closeTodoModal);
 if($("todoModal")) $("todoModal").addEventListener("click", e=>{ if(e.target === $("todoModal")) closeTodoModal(); });
 
-// Клик по элементу чек-листа: переключает галочку и сразу перемещает вниз
+// Клик по товару в чек-листе сборки — перемещает вниз
 if($("todoRows")) {
   $("todoRows").addEventListener("click", e=>{
     const item = e.target.closest(".todo-item");
     if (!item) return;
-    const cid = item.dataset.tcid;
-    const c = cart.find(x => x.cid === cid);
+    const c = cart.find(x => x.cid === item.dataset.tcid);
     if (c) {
       c.done = !c.done;
       saveCart();
-      renderTodoModal(); // Мгновенный перерендер с сортировкой
+      renderTodoModal();
     }
   });
 }
 
-// Сброс всех галочек
 if($("todoResetBtn")) {
   $("todoResetBtn").addEventListener("click", ()=>{
     cart.forEach(c => c.done = false);
@@ -594,7 +545,7 @@ if($("todoResetBtn")) {
 }
 
 document.addEventListener("keydown", e=>{ 
-  if(e.key === "Escape") { closeReceipt(); closeTodoModal(); }
+  if(e.key === "Escape") { closeReceipt(); closeTodoModal(); closeCartDrawer(); }
 });
 
 if($("rcopy")) {
